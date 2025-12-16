@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>교회 라디오 방송 (분 단위 스케줄)</title>
+    <title>CGN JoyManna Radio (분 단위 스케줄)</title>
     <style>
         /* (스타일 시트는 이전과 동일합니다) */
         body {
@@ -17,28 +17,28 @@
         .radio-container {
             text-align: center;
             background: #ffffff;
-            padding: 30px;
+            padding: 15px;
             border-radius: 15px;
-            max-width: 400px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
         h2 {
             color: #2b4b80;
             margin-bottom: 10px;
         }
         p {
-            font-size: 15px;
+            font-size: 12px;
             color: #555;
             margin: 5px 0;
         }
         #program-name {
             font-weight: bold;
             color: #333;
-            font-size: 18px;
+            font-size: 12px;
         }
         #radioPlayer {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 13px;
         }
         #startButton {
             padding: 12px 25px;
@@ -48,7 +48,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 17px;
+            font-size: 13px;
             font-weight: bold;
             transition: background-color 0.3s;
         }
@@ -66,15 +66,15 @@
 <body>
 
 <div class="radio-container">
-    <h2>⛪ 교회 라디오 방송 (분 단위)</h2>
+    <h2>⛪ CGN JoyManna Radio (분 단위)</h2>
     <p id="current-time"></p>
-    <p>현재 방송: <span id="program-name">시작 대기 중...</span></p>
+    <p>Now on-Air: <span id="program-name">Wait to start...</span></p>
 
     <audio id="radioPlayer" controls preload="auto" loop> 
-        브라우저가 오디오 재생을 지원하지 않습니다.
+        This browser is not support this file.
     </audio>
 
-    <button id="startButton">▶ 라디오 재생 시작</button>
+    <button id="startButton">▶ On-air Now!</button>
     <p class="status-message" id="statusMessage"></p>
 </div>
 
@@ -128,7 +128,7 @@
 
         // 현재 시각 업데이트 (분까지 표시)
         document.getElementById("current-time").textContent = 
-            "현재 시각: " + now.toLocaleTimeString('ko-KR', { hour12: false });
+            "Time: " + now.toLocaleTimeString('ko-KR', { hour12: false });
 
         // 총 분 값을 사용하여 스케줄을 찾습니다.
         const program = schedule.find(p => currentMinutes >= p.minStart && currentMinutes <= p.minEnd);
@@ -145,8 +145,8 @@
                     player.play().then(() => {
                         statusMessageEl.textContent = "";
                     }).catch(err => {
-                        console.error("재생 실패 (URL 변경 후 자동 재생 차단):", err);
-                        statusMessageEl.textContent = "❗ 재생에 실패했습니다. (새 프로그램 자동 재생 차단)";
+                        console.error("Play error (URL 변경 후 자동 재생 차단):", err);
+                        statusMessageEl.textContent = "❗ Play Error. (New program blocked play)";
                     });
                 } 
                 // 2. URL은 동일한데 플레이어가 멈춰있는지 확인 (파일이 끝났거나 수동 정지)
@@ -157,19 +157,19 @@
                 }
 
             } else {
-                programNameEl.textContent = program.name + " (재생 대기 중)";
-                statusMessageEl.textContent = "라디오를 듣기 위해 '재생 시작' 버튼을 눌러주세요.";
+                programNameEl.textContent = program.name + " (Wait to play)";
+                statusMessageEl.textContent = "Please click play button to start.";
             }
 
         } else {
             // 방송 시간이 아닐 때
-            programNameEl.textContent = "현재 방송 없음";
+            programNameEl.textContent = "Now, No schedule";
             player.pause();
             if (player.src) { 
                 player.src = ""; 
             }
             if(isPlayerStarted) {
-                statusMessageEl.textContent = "현재는 라디오 방송 시간대가 아닙니다.";
+                statusMessageEl.textContent = "No time to schedule, Please wait...";
             } else {
                 statusMessageEl.textContent = "";
             }

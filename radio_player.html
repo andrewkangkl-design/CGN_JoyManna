@@ -10,37 +10,42 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 90vh;
-            background-color: #fff;
-	    	background: linear-gradient(135deg, #141e30, #243b55);
+            min-height: 100vh;
+			// *background gradiation is cover overall
+			background: linear-gradient(135deg, #141e30, #243b55);
+			//outside padding make 0
             margin: 0;
+			padding: 0;
+			overflow: hidden; //scroll disabled
         }
         .radio-container {
             text-align: center;
-            background: #ffffff;
-            padding: 10px;
-            border-radius: 12px;
-            max-width: 700px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+			background: rgba(255.255.255. 0.95); //trnsparent put little bit
+            //background: #ffffff;
+            padding: 25px;
+            border-radius: 15px;
+			width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);
         }
         h2 {
             color: #2b4b80;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
 			font-size: 12px;
         }
         p {
-            font-size: 10px;
+            font-size: 11px;
             color: #555;
-            margin: 5px 0;
+            margin: 10px 0;
         }
         #program-name {
             font-weight: bold;
             color: #333;
-            font-size: 10px;
+            font-size: 11px;
         }
         #radioPlayer {
             width: 100%;
-            margin-top: 10px;
+            margin-top: 15px;
         }
         #startButton {
             padding: 10px 10px;
@@ -50,12 +55,13 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
             transition: background-color 0.3s;
         }
         #startButton:hover {
             background-color: #45a049;
+			transform: scale(1.02)
         }
         .status-message {
             margin-top: 10px;

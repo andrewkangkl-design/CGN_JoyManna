@@ -165,8 +165,8 @@
         const statusMessageEl = document.getElementById("statusMessage");
 
         // 현재 시각 업데이트 (분까지 표시)
-       /* document.getElementById("current-time").textContent = 
-            "Current Time: " + now.toLocaleTimeString('ko-KR', { hour12: false });*/
+        //document.getElementById("current-time").textContent = 
+         //   "Current Time: " + now.toLocaleTimeString('ko-KR', { hour12: false });
 
         // 총 분 값을 사용하여 스케줄을 찾습니다.
         const program = schedule.find(p => currentMinutes >= p.minStart && currentMinutes <= p.minEnd);

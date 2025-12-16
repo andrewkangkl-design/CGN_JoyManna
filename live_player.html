@@ -205,9 +205,9 @@
         // 3. 찾은 프로그램의 URL 생성 (예: BASE_URL + 'mon/' + '0600.mp3')
         return {
             name: program.name,
-            //url: BASE_URL + dayKey + "/" + program.file //임시로 화요일 파일만 play 하도록 함
-            url: BASE_URL + 'tue' + "/" + program.file,
-            console.log("play file:", program.url)
+            url: BASE_URL + dayKey + "/" + program.file //임시로 화요일 파일만 play 하도록 함
+            //url: BASE_URL + 'tue' + "/" + program.file,
+            //console.log("play file:", program.url)
         };
     }
 

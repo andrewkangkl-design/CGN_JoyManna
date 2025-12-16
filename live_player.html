@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>요일 + 시간대별 자동 라디오</title>
+    <style>
+        body {
+            font-family: "Noto Sans KR", sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            color: #fff;
+            text-align: center;
+            padding: 10px 20px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        #current-time {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        #info {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+            min-height: 25px; /* 높이 확보 */
+        }
+
+        audio {
+            width: 90%;
+            margin-top: 10px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+
+        #playBtn {
+            margin-top: 10px;
+            background: #00bcd4;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.0rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #playBtn:hover {
+            background: #0097a7;
+        }
+        
+        #statusMessage {
+            font-size: 0.8rem;
+            color: #ffcc00;
+            margin-top: 5px;
+            min-height: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎶 요일별 24시간 라디오 방송</h1>
+    <p id="current-time">현재 시각 로딩 중...</p>
+    <p id="info">현재 재생 중: 시작 대기 중...</p>
+    
+    <audio id="player" controls loop></audio><br/>
+    <button id="playBtn">▶ 재생 시작</button>
+    <p id="statusMessage"></p>
+
+<script>
+    const player = document.getElementById("player");
+    const info = document.getElementById("info");
+    const playBtn = document.getElementById("playBtn");
+    const statusMessageEl = document.getElementById("statusMessage");
+    const currentTimeEl = document.getElementById("current-time");
+
+    // 시간과 분을 받아서 하루의 총 분(minute)으로 계산하는 헬퍼 함수
+    function timeToMinutes(hour, minute) {
+        return hour * 60 + minute;
+    }
+
+    // ★★★ 스케줄 데이터: 요일(0=일~6=토)과 분 단위 시간 설정 ★★★
+    // [시, 분]을 timeToMinutes 헬퍼 함수로 직접 변환하여 사용합니다.
+    const APPS_SCRIPT_URL = "https://andrewkangkl-design.github.io/CGN_JoyManna/"; // 기본 URL
+    
+    const SCHEDULE_DATA = {
+        // 일요일 (0)
+        0: [
+            { start: timeToMinutes(10, 0), end: timeToMinutes(11, 30), name: "주일 오전 예배", url: APPS_SCRIPT_URL + "sun_sermon.mp3" },
+            { start: timeToMinutes(18, 0), end: timeToMinutes(23, 59), name: "주일 저녁 기도", url: APPS_SCRIPT_URL + "sun_evening.mp3" },
+            { start: timeToMinutes(0, 0), end: timeToMinutes(9, 59), name: "주일 새벽 찬양", url: APPS_SCRIPT_URL + "sun_dawn.mp3" },
+        ],
+        // 월요일 (1) ~ 토요일 (6) 스케줄은 동일하다고 가정합니다.
+        1: [
+            { start: timeToMinutes(6, 0), end: timeToMinutes(11, 59), name: "월요 아침 찬양", url: APPS_SCRIPT_URL + "mon_morning.mp3" },
+            { start: timeToMinutes(12, 0), end: timeToMinutes(17, 29), name: "월요 낮 설교 방송", url: APPS_SCRIPT_URL + "mon_sermon.mp3" },
+            { start: timeToMinutes(17, 30), end: timeToMinutes(23, 59), name: "월요 저녁 기도 음악", url: APPS_SCRIPT_URL + "mon_evening_prayer.mp3" },
+            { start: timeToMinutes(0, 0), end: timeToMinutes(5, 59), name: "월요 새벽 묵상", url: APPS_SCRIPT_URL + "mon_dawn.mp3" },
+        ],
+        // 화요일 (2) ~ 금요일 (5) - 월요일과 동일한 스케줄을 사용하거나 개별 설정 가능
+        2: [
+            { start: timeToMinutes(6, 0), end: timeToMinutes(11, 59), name: "화요 아침 찬양", url: APPS_SCRIPT_URL + "tue_morning.mp3" },
+            { start: timeToMinutes(12, 0), end: timeToMinutes(17, 29), name: "화요 낮 설교 방송", url: APPS_SCRIPT_URL + "tue_sermon.mp3" },
+            { start: timeToMinutes(17, 30), end: timeToMinutes(23, 59), name: "화요 저녁 기도 음악", url: APPS_SCRIPT_URL + "tue_evening_prayer.mp3" },
+            { start: timeToMinutes(0, 0), end: timeToMinutes(5, 59), name: "화요 새벽 묵상", url: APPS_SCRIPT_URL + "tue_dawn.mp3" },
+        ],
+        // ... 3, 4, 5, 6 요일도 필요에 따라 복사하여 사용하세요.
+        // 현재는 1(월)의 스케줄을 기본값으로 사용한다고 가정합니다.
+        
+        // 스케줄이 정의되지 않은 요일의 기본값
+        'default': [
+            { start: timeToMinutes(0, 0), end: timeToMinutes(23, 59), name: "연속 방송 (기본)", url: APPS_SCRIPT_URL + "default_loop.mp3" }
+        ]
+    };
+    
+    let isPlayerStarted = false; 
+
+    function getCurrentProgram() {
+        const now = new Date();
+        const day = now.getDay(); // 0 (일) ~ 6 (토)
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
+        const todaySchedule = SCHEDULE_DATA[day] || SCHEDULE_DATA['default'] || [];
+
+        // 현재 시각을 분 단위로 비교하여 해당되는 프로그램 찾기
+        const program = todaySchedule.find(p => currentMinutes >= p.start && currentMinutes <= p.end);
+        
+        return program;
+    }
+
+    function updateRadio() {
+        const now = new Date();
+        const program = getCurrentProgram();
+        
+        // 현재 시각 표시
+        currentTimeEl.textContent = "현재 시각: " + now.toLocaleTimeString('ko-KR', { hour12: false }) + " (" + 
+                                   ['일', '월', '화', '수', '목', '금', '토'][now.getDay()] + "요일)";
+
+        if (program) {
+            info.textContent = `현재 재생 중: ${program.name}`;
+            
+            if (isPlayerStarted) {
+                // 1. URL이 변경되었는지 확인 (다음 스케줄 시간대로 넘어감)
+                if (player.src !== program.url) {
+                    player.src = program.url;
+                    player.load(); 
+                    
+                    player.play().then(() => {
+                        statusMessageEl.textContent = "";
+                        playBtn.style.display = "none"; // 자동 전환 성공 시 버튼 숨김
+                    }).catch(err => {
+                        console.error("자동 전환 재생 실패:", err);
+                        statusMessageEl.textContent = "❗ 자동 재생이 차단되었습니다. 재생 버튼을 눌러주세요.";
+                        playBtn.style.display = "block"; // 실패 시 버튼 재표시
+                    });
+                } 
+                // 2. URL은 동일한데 플레이어가 멈춰있는지 확인 (파일 끝남)
+                else if (player.paused && !player.error) { 
+                    player.play().catch(err => {
+                        // 자동 재생 재시도 실패는 주로 브라우저의 제약 때문입니다.
+                        console.error("파일 종료 후 자동 재시도 실패:", err);
+                    });
+                }
+            } else {
+                info.textContent = `다음 방송: ${program.name} (재생 대기 중)`;
+                player.src = program.url; // URL 미리 로드
+                playBtn.style.display = "block"; // 재생 시작 버튼 표시
+            }
+
+        } else {
+            // 방송 시간이 아닐 때
+            info.textContent = "현재는 방송 시간대가 아닙니다.";
+            player.pause();
+            player.src = ""; 
+            if(isPlayerStarted) {
+                 statusMessageEl.textContent = "다음 방송 시간대를 기다려주세요.";
+            }
+            playBtn.style.display = "none";
+        }
+    }
+
+    // === 이벤트 리스너: 재생 시작 버튼 처리 ===
+    playBtn.addEventListener("click", () => {
+        const program = getCurrentProgram();
+        if (!program) {
+             statusMessageEl.textContent = "현재는 방송 시간이 아닙니다.";
+             return;
+        }
+
+        if (!isPlayerStarted) {
+            isPlayerStarted = true;
+            // 최초 재생 시도
+            player.src = program.url; // 다시 확실하게 설정
+            
+            player.play()
+                .then(() => {
+                    playBtn.style.display = "none";
+                    statusMessageEl.textContent = "";
+                    info.textContent = `현재 재생 중: ${program.name}`;
+                })
+                .catch(error => {
+                    console.error("첫 재생 오류:", error);
+                    statusMessageEl.textContent = `재생이 차단되었습니다. (브라우저 정책). 버튼을 다시 눌러주세요.`;
+                    isPlayerStarted = false; // 재생 실패 시 상태 초기화
+                });
+        }
+    });
+
+    // 페이지 로드 시 초기화 및 시간 표시
+    updateRadio();
+
+    // 스케줄 변경을 즉시 감지하기 위해 5초마다 실행
+    setInterval(updateRadio, 5000); 
+</script>
+</body>
+</html>

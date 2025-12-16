@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>요일 폴더 기반 자동 라디오</title>
+    <title>CGN JoyManna Radio</title>
     <style>
         /* (스타일 시트는 이전과 동일합니다) */
         body {
@@ -63,12 +63,12 @@
     </style>
 </head>
 <body>
-    <h1>🎶 요일별 폴더 기반 라디오 방송</h1>
-    <p id="current-time">현재 시각 로딩 중...</p>
-    <p id="info">현재 재생 중: 시작 대기 중...</p>
+    <h1>🎶 CGN JoyManna Radio</h1>
+    <p id="current-time">Current Time loading...</p>
+    <p id="info">On-Air: Click to Play now...</p>
     
     <audio id="player" controls loop></audio><br/>
-    <button id="playBtn">▶ 재생 시작</button>
+    <button id="playBtn">▶ Play</button>
     <p id="statusMessage"></p>
 
 <script>
@@ -274,11 +274,11 @@
                 .then(() => {
                     playBtn.style.display = "none";
                     statusMessageEl.textContent = "";
-                    info.textContent = `현재 재생 중: ${program.name}`;
+                    info.textContent = `On-Air: ${program.name}`;
                 })
                 .catch(error => {
-                    console.error("첫 재생 오류:", error);
-                    statusMessageEl.textContent = `재생이 차단되었습니다. (브라우저 정책). 버튼을 다시 눌러주세요.`;
+                    console.error("Error:", error);
+                    statusMessageEl.textContent = `Stopped Play. (브라우저 정책). Click Play button now!`;
                     isPlayerStarted = false; 
                 });
         }

@@ -19,7 +19,7 @@
             align-items: center;
             min-height: 100vh;
 			// *background gradiation is cover overall
-			background: linear-gradient(135deg, #141e30, #243b55);
+			background: linear-gradient(135deg, #0f172a, #1e293b);
 			//outside padding make 0
             margin: 0;
 			padding: 0;
@@ -27,52 +27,64 @@
         }
         .radio-container {
             text-align: center;
-			background: rgba(255.255.255. 0.95); //trnsparent put little bit
+			background: rgba(30, 40, 59, 0.7); //trnsparent put little bit
             //background: #ffffff;
             padding: 25px;
             border-radius: 15px;
 			width: 90%;
-            max-width: 450px;
-            box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);
-        }
+            max-width: 400px;
+			/* 테두리에 살짝 빛을 주어 어두운 배경과 분리 */
+			border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);	
+			backdrop-filter: blur(10px); /* 배경 흐림 효과로 글자 가독성 향상 */ㅠ     }
         h2 {
-            color: #2b4b80;
+            color: #ffffff;
             margin-bottom: 15px;
 			font-size: 12px;
+			text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         p {
             font-size: 11px;
-            color: #555;
+            color: #cbd5e1;
             margin: 10px 0;
         }
         #program-name {
             font-weight: bold;
-            color: #333;
+            color: #38bdf8;
             font-size: 11px;
+			display: block;
+    		margin-top: 5px;
         }
+		#current-time {
+    		color: #94a3b8;
+    		font-size: 12px;
+  		}
         #radioPlayer {
             width: 100%;
-            margin-top: 15px;
+            margin-top: 10px;
+			/* 오디오 플레이어의 색상은 브라우저 기본값을 따르지만 
+       		다크모드 브라우저 환경에서 더 잘 보입니다. */
         }
         #startButton {
             padding: 10px 10px;
             margin-top: 5px;
-            background-color: #4CAF50;
+            background-color: #10b981;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 11px;
             font-weight: bold;
-            transition: background-color 0.3s;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    		transition: all 0.2s ease;
         }
         #startButton:hover {
-            background-color: #45a049;
-			transform: scale(1.02)
+            background-color: #059669;
+			transform: scale(-2px)
         }
         .status-message {
             margin-top: 10px;
-            color: #d9534f;
+            color: #fbbf24;
             font-weight: bold;
             min-height: 15px;
         }

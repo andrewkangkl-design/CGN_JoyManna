@@ -64,7 +64,7 @@
 </head>
 <body>
     <h1>🎶 CGN JoyManna Radio</h1>
-    <p id="current-time">Current Time loading...</p>
+    <p id="current-time">Loading Current Time...</p>
     <p id="info">On-Air: Click to Play now...</p>
     
     <audio id="player" controls loop></audio><br/>
@@ -105,9 +105,9 @@
         ],
         'mon': [
             // 06:00 에 시작 (파일명: mon/0600.mp3) -> 11:59까지
-            { start: [6, 0], end: [11, 59], name: "월요 아침 찬양", file: "0600.mp3" },
+            { start: [6, 0], end: [11, 59], name: "Monday praise", file: "0600.mp3" },
             // 12:00 에 시작 (파일명: mon/1200.mp3) -> 17:29까지
-            { start: [12, 0], end: [17, 29], name: "월요 낮 설교 방송", file: "1200.mp3" },
+            { start: [12, 0], end: [17, 29], name: "Good afternoon", file: "1200.mp3" },
             // 17:30 에 시작 (파일명: mon/1730.mp3) -> 23:59까지
             { start: [17, 30], end: [23, 59], name: "월요 저녁 기도 음악", file: "1730.mp3" },
             // 00:00 에 시작 (파일명: mon/0000.mp3) -> 05:59까지
@@ -115,7 +115,7 @@
         ],
         'tue': [
             // 06:00 에 시작 (파일명: tue/0600.mp3) -> 11:59까지
-            { start: [6, 0], end: [6, 59], name: "화요 아침 찬양", file: "0600.mp3" },
+            { start: [6, 0], end: [6, 59], name: "Tuesday Morning Paise", file: "0600.mp3" },
             // 11:00 에 시작 (파일명: tue/1200.mp3) -> 11:59까지
             { start: [11, 0], end: [11, 59], name: "화요 낮 설교 방송", file: "1100.mp3" },
             // 17:30 에 시작 (파일명: tue/1730.mp3) -> 23:59까지
@@ -197,7 +197,7 @@
         // 2. 해당 요일에 스케줄이 없거나 시간대가 비어있으면 기본 파일 재생
         if (!program) {
             return {
-                name: "기본 배경 음악 (스케줄 없음)",
+                name: "Backgroud praise (No on-air schedule)",
                 url: BASE_URL + "default.mp3"
             };
         }
@@ -215,8 +215,8 @@
         const now = new Date();
         const program = getCurrentProgram();
         
-        currentTimeEl.textContent = "현재 시각: " + now.toLocaleTimeString('ko-KR', { hour12: false }) + " (" + 
-                                   ['일', '월', '화', '수', '목', '금', '토'][now.getDay()] + "요일)";
+        currentTimeEl.textContent = "Current Time: " + now.toLocaleTimeString('ko-KR', { hour12: false }) + " (" + 
+                                   ['Sun', 'Mon', 'Tues', 'Wednes', 'Thurth', 'Fri', 'Sature'][now.getDay()] + "day)";
 
         if (program) {
             info.textContent = `현재 재생 중: ${program.name}`;
@@ -231,8 +231,8 @@
                         statusMessageEl.textContent = "";
                         playBtn.style.display = "none";
                     }).catch(err => {
-                        console.error("자동 전환 재생 실패:", err);
-                        statusMessageEl.textContent = "❗ 자동 재생이 차단되었습니다. 재생 버튼을 눌러주세요.";
+                        console.error("Failed auto play:", err);
+                        statusMessageEl.textContent = "❗ It is blocked Play. Please Click the Play button.";
                         playBtn.style.display = "block";
                     });
                 } 
@@ -244,18 +244,18 @@
                 }
             } else {
                 // 재생 시작 버튼을 눌러야 함
-                info.textContent = `다음 방송: ${program.name} (재생 대기 중)`;
+                info.textContent = `Next schedule: ${program.name} (Click the Play button)`;
                 player.src = program.url; 
                 playBtn.style.display = "block"; 
             }
 
         } else {
             // 이 로직은 기본 파일 (default.mp3)이 없는 경우에만 실행됩니다.
-            info.textContent = "현재는 방송 시간대가 아닙니다.";
+            info.textContent = "Now, no on-air schedule.";
             player.pause();
             player.src = ""; 
             if(isPlayerStarted) {
-                 statusMessageEl.textContent = "다음 방송 시간대를 기다려주세요.";
+                 statusMessageEl.textContent = "Please waint next schedule.";
             }
             playBtn.style.display = "none";
         }

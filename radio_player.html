@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>교회 라디오 방송 (분 단위 스케줄)</title>
+    <style>
+        /* (스타일 시트는 이전과 동일합니다) */
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+        .radio-container {
+            text-align: center;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2b4b80;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 15px;
+            color: #555;
+            margin: 5px 0;
+        }
+        #program-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 18px;
+        }
+        #radioPlayer {
+            width: 100%;
+            margin-top: 20px;
+        }
+        #startButton {
+            padding: 12px 25px;
+            margin-top: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #startButton:hover {
+            background-color: #45a049;
+        }
+        .status-message {
+            margin-top: 15px;
+            color: #d9534f;
+            font-weight: bold;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="radio-container">
+    <h2>⛪ 교회 라디오 방송 (분 단위)</h2>
+    <p id="current-time"></p>
+    <p>현재 방송: <span id="program-name">시작 대기 중...</span></p>
+
+    <audio id="radioPlayer" controls preload="auto" loop> 
+        브라우저가 오디오 재생을 지원하지 않습니다.
+    </audio>
+
+    <button id="startButton">▶ 라디오 재생 시작</button>
+    <p class="status-message" id="statusMessage"></p>
+</div>
+
+<script>
+    // 시간과 분을 받아서 하루의 총 분(minute)으로 계산하는 헬퍼 함수
+    function timeToMinutes(hour, minute) {
+        return hour * 60 + minute;
+    }
+
+    // === 1. 스케줄 설정: [시, 분] 배열 형태로 시간대 설정 ===
+    // GitHub Pages에서 사용하시는 실제 직접 링크.
+    const scheduleConfig = [
+        // start: 6시 00분, end: 23시 59분 (6시 00분부터 다음 방송)
+        { start: [6, 0], end: [7, 0], 	name: "새벽 묵상 찬양", 	url: "https://andrewkangkl-design.github.io/CGN_JoyManna/18.mp3" },
+        { start: [7, 30], end: [8, 0], 	name: "아침 찬양", 	url: "https://example.com/audio/morning.mp3" },
+        { start: [8, 0], end: [9, 0], 	name: "낮 설교 방송", 	url: "https://andrewkangkl-design.github.io/CGN_JoyManna/18.mp3" },
+        { start: [9, 0], end: [10, 0], 	name: "낮 설교 방송", 	url: "https://andrewkangkl-design.github.io/CGN_JoyManna/17.mp3" }, 
+       { start: [10, 0], end: [11, 0], name: "저녁 기도 음악", 	url: "https://example.com/audio/evening_prayer.mp3" },
+        { start: [11, 0], end: [12, 0], name: "저녁 기도 음악", 	url: "https://example.com/audio/evening_prayer.mp3" },
+
+	//오후방송
+        { start: [13, 0], end: [14, 0], name: "새벽 묵상 찬양", 	url: "https://andrewkangkl-design.github.io/CGN_JoyManna/18.mp3" },
+        { start: [15, 0], end: [16, 30],name: "아침 찬양", 	url: "https://github.com/andrewkangkl-design/CGN_JoyManna/blob/main/18.mp3" },
+        { start: [17, 0], end: [18, 0], name: "낮 설교 방송", 	url: "https://github.com/andrewkangkl-design/CGN_JoyManna/blob/main/18.mp3" },
+        { start: [19, 0], end: [20, 0], name: "저녁 기도 음악", 	url: "https://github.com/andrewkangkl-design/CGN_JoyManna/blob/main/18.mp3" },
+	//저녁방송
+        { start: [21, 0], end: [22, 0], name: "새벽 묵상 찬양", 	url: "https://andrewkangkl-design.github.io/CGN_JoyManna/18.mp3" },
+        { start: [23, 0], end: [23, 59],name: "아침 찬양", 	url: "https://example.com/audio/morning.mp3" }
+    ];
+
+    // 스케줄을 총 분 값으로 미리 변환
+    const schedule = scheduleConfig.map(p => ({
+        minStart: timeToMinutes(p.start[0], p.start[1]),
+        minEnd: timeToMinutes(p.end[0], p.end[1]),
+        name: p.name,
+        url: p.url
+    }));
+
+
+    let isPlayerStarted = false; 
+
+    function updateRadio() {
+        const now = new Date();
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        const currentMinutes = timeToMinutes(hour, minute); // 현재 시각을 총 분으로 계산
+
+        const player = document.getElementById("radioPlayer");
+        const programNameEl = document.getElementById("program-name");
+        const statusMessageEl = document.getElementById("statusMessage");
+
+        // 현재 시각 업데이트 (분까지 표시)
+        document.getElementById("current-time").textContent = 
+            "현재 시각: " + now.toLocaleTimeString('ko-KR', { hour12: false });
+
+        // 총 분 값을 사용하여 스케줄을 찾습니다.
+        const program = schedule.find(p => currentMinutes >= p.minStart && currentMinutes <= p.minEnd);
+
+        if (program) {
+            programNameEl.textContent = program.name;
+            
+            if (isPlayerStarted) {
+                // 1. URL이 변경되었는지 확인 (다음 시간대로 넘어감)
+                if (player.src !== program.url) {
+                    player.src = program.url;
+                    player.load(); 
+                    
+                    player.play().then(() => {
+                        statusMessageEl.textContent = "";
+                    }).catch(err => {
+                        console.error("재생 실패 (URL 변경 후 자동 재생 차단):", err);
+                        statusMessageEl.textContent = "❗ 재생에 실패했습니다. (새 프로그램 자동 재생 차단)";
+                    });
+                } 
+                // 2. URL은 동일한데 플레이어가 멈춰있는지 확인 (파일이 끝났거나 수동 정지)
+                else if (player.paused) { 
+                    player.play().catch(err => {
+                        console.error("자동 재생 재시도 실패:", err);
+                    });
+                }
+
+            } else {
+                programNameEl.textContent = program.name + " (재생 대기 중)";
+                statusMessageEl.textContent = "라디오를 듣기 위해 '재생 시작' 버튼을 눌러주세요.";
+            }
+
+        } else {
+            // 방송 시간이 아닐 때
+            programNameEl.textContent = "현재 방송 없음";
+            player.pause();
+            if (player.src) { 
+                player.src = ""; 
+            }
+            if(isPlayerStarted) {
+                statusMessageEl.textContent = "현재는 라디오 방송 시간대가 아닙니다.";
+            } else {
+                statusMessageEl.textContent = "";
+            }
+        }
+    }
+
+    // === 이벤트 리스너: 재생 시작 버튼 처리 ===
+    document.getElementById("startButton").addEventListener('click', function() {
+        if (!isPlayerStarted) {
+            isPlayerStarted = true;
+            this.style.display = 'none';
+            updateRadio(); 
+        }
+    });
+
+    // 페이지 로드 시 초기화 및 시간 표시
+    updateRadio();
+
+    // ★ 스케줄 변경을 즉시 감지하기 위해 5초마다 실행
+    // 분이 바뀌는 순간(60초 주기)에만 확인하면 시간이 지연될 수 있습니다.
+    setInterval(updateRadio, 5000); 
+</script>
+</body>
+</html>

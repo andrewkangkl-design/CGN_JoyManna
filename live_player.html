@@ -202,7 +202,7 @@
             };
         }
 
-        console.log(">>>>>>> getCurrentProgram play file:" + program.url)//>>>>>>>>>>>getCurrentProgram에서 찾은 url
+        //console.log(">>>>>>> getCurrentProgram play file:" + program.url)//>>>>>>>>>>>getCurrentProgram에서 찾은 url
         // 3. 찾은 프로그램의 URL 생성 (예: BASE_URL + 'mon/' + '0600.mp3')
         return {
             name: program.name,
@@ -223,7 +223,7 @@
 
         if (program) {
             info.textContent = `On-Air: ${program.name}`;
-            console.log("파일 URL:"+ program.url);
+            //console.log("파일 URL:"+ program.url);
             if (isPlayerStarted) {
                 // 1. URL이 변경되었는지 확인 (다음 스케줄 시간대로 넘어감)
                 if (player.src !== program.url) {

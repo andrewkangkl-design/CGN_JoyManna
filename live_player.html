@@ -206,8 +206,8 @@
         return {
             name: program.name,
             //url: BASE_URL + dayKey + "/" + program.file //임시로 화요일 파일만 play 하도록 함
-            url: BASE_URL + "tue" + "/" + program.file,
-            console.log("play file:", program.url)
+            url: BASE_URL + "tue" + "/" + program.file
+            //console.log("play file:", program.url)
         };
     }
 
@@ -222,22 +222,26 @@
 
         if (program) {
             info.textContent = `On-Air: ${program.name}`;
-            
+            console.log("파일 URL:", program.url);
             if (isPlayerStarted) {
                 // 1. URL이 변경되었는지 확인 (다음 스케줄 시간대로 넘어감)
                 if (player.src !== program.url) {
+                    console.log(">>> 새로운 프로그램 발견! URL 변경 및 재생 시도");
                     player.src = program.url;
                     player.load(); 
                     
                     player.play().then(() => {
                         statusMessageEl.textContent = "";
                         playBtn.style.display = "none";
+                        console.log(">>> 재생 성공: " + program.url);
                     }).catch(err => {
                         console.error("Failed auto play:", err);
                         statusMessageEl.textContent = "❗ It is blocked Play. Please Click the Play button.";
                         playBtn.style.display = "block";
                     });
                 } 
+                console.log("현재 플레이어 소스(Player.src):", player.src);
+                
                 // 2. URL은 동일한데 플레이어가 멈춰있는지 확인 (파일 끝남)
                 else if (player.paused && !player.error) { 
                     player.play().catch(err => {

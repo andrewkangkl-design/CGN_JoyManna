@@ -4,29 +4,41 @@
     <meta charset="UTF-8" />
     <title>CGN JoyManna Radio</title>
     <style>
+   		 {
+    	/* 모든 요소의 여백 초기화 및 크기 계산 방식 통일 */
+    	margin: 0;
+    	padding: 0;
+    	box-sizing: border-box;
+      }
+
         /* (스타일 시트는 이전과 동일합니다) */
         body {
             font-family: "Noto Sans KR", sans-serif;
             display: flex;
             justify-content: center;
-            background-color: #ffffff;
-            /*background: linear-gradient(135deg, #141e30, #243b55);*/
+            /*background-color: #ffffff;*/
+            background: linear-gradient(135deg, #141e30, #243b55);
             text-align: center;
-            padding: 1px 1px;
+            margin:0;
+            padding: 0;
         }
         .radio-container {
             text-align: center;
-            background: linear-gradient(135deg, #141e30, #243b55);/*#000000;*/
+            background: rgba(30, 40, 59, 0.7);/*#000000;*/
             padding: 5px;
             border-radius: 15px;
-            max-width: 700%;
+            width: 90%
+            max-width: 700px;
             max-height: 100%;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            backfrop-filter: blur(10px);
         }
         h1 {
-            color: #2b4b80;
+            color: #ffffff;
             font-size: 1.0rem;
             margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-weight: bold;
         }
         
         #current-time {

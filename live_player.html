@@ -233,7 +233,7 @@
                     player.play().then(() => {
                         statusMessageEl.textContent = "";
                         playBtn.style.display = "none";
-                        console.log(">>> 재생 성공: " + program.url);
+                        console.log(">>> 재생 성공: ", program.url);
                     }).catch(err => {
                         console.error("Failed auto play:", err);
                         statusMessageEl.textContent = "❗ It is blocked Play. Please Click the Play button.";

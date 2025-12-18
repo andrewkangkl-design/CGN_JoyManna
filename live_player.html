@@ -111,14 +111,15 @@
     const statusMessageEl = document.getElementById("statusMessage");
     const currentTimeEl = document.getElementById("current-time");
     const debug=1;
+	const BASE_URL="";
 
     // 기본 GitHub Pages URL (사용자님의 저장소 주소)
     // 반드시 실제 주소로 바꿔주세요! (예: https://andrewkangkl-design.github.io/CGN_JoyManna/)
 	if(debug){
-    	const BASE_URL =  "http://gofile.me/7l97h/lJ6XDExuO/";
+    	BASE_URL = "http://gofile.me/7l97h/lJ6XDExuO/";
 	}
 	else { 
-		const BASE_URL = "https://andrewkangkl-design.github.io/CGN_JoyManna/";
+		BASE_URL = "https://andrewkangkl-design.github.io/CGN_JoyManna/";
 	}
     
     const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];

@@ -115,7 +115,7 @@
 
     // 기본 GitHub Pages URL (사용자님의 저장소 주소)
     // 반드시 실제 주소로 바꿔주세요! (예: https://andrewkangkl-design.github.io/CGN_JoyManna/)
-	if(debug){
+	if (debug){
     	BASE_URL = "http://gofile.me/7l97h/lJ6XDExuO/";
 		console.log(BASE_URL);
 	}
@@ -243,7 +243,7 @@
                 url: BASE_URL + "default.mp3"
             };
         }
-        if(debug){
+        if (debug){
             console.log(">>>>>>> getCurrentProgram play file:" + program.url)//>>>>>>>>>>>getCurrentProgram에서 찾은 url
         }
         // 3. 찾은 프로그램의 URL 생성 (예: BASE_URL + 'mon/' + '0600.mp3')
@@ -303,7 +303,7 @@
             info.textContent = "Now, no on-air schedule.";
             player.pause();
             player.src = ""; 
-            if(isPlayerStarted) {
+            if (isPlayerStarted) {
                  statusMessageEl.textContent = "Please wait next schedule.";
             }
             playBtn.style.display = "none";

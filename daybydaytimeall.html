@@ -90,6 +90,7 @@
     const statusMessageEl = document.getElementById("statusMessage");
     const currentTimeEl = document.getElementById("current-time");
 
+
     let isPlayerStarted = false;
     let currentTrackIndex = 1;
     let skipAttemptCount = 0; // 파일이 없을 때 넘기기 시도 횟수 제한
@@ -100,7 +101,11 @@
      //   : "https://andrewkangkl-design.github.io/CGN_JoyManna/";
     const BASE_URL = "https://andrewkangkl-design.github.io/CGN_JoyManna/";
     console.log("URL:" + BASE_URL);
-/*
+	
+	const DEFAULT_AUDIO = `${BASE_URL}defaulty.mp3`;
+	let isDefaultPlaying = false;
+	
+	/*
     // 2. 요일별 테마 색상 정의
     const THEMES = [
         "linear-gradient(135deg, #450a0a, #7f1d1d)", // 일 (Red)
@@ -119,8 +124,8 @@
         'tue': [{ start: [6, 0], end: [23, 59], name: "화요 은혜의 대로", timeFolder: "0600", fileCount: 10 }],
         'wed': [{ start: [6, 0], end: [23, 59], name: "수요 감사의 찬양", timeFolder: "0600", fileCount: 10 }],
         'thu': [{ start: [6, 0], end: [23, 59], name: "목요 평화의 기도", timeFolder: "0600", fileCount: 18 }],
-        'fri': [{ start: [6, 0], end: [23, 59], name: "금요 성령의 불길", timeFolder: "0600", fileCount: 10 }],
-        'sat': [{ start: [6, 0], end: [23, 59], name: "토요 소망의 노래", timeFolder: "0600", fileCount: 10 }]
+        'fri': [{ start: [6, 0], end: [23, 59], name: "금요 성령의 불길", timeFolder: "0600", fileCount: 18 }],
+        'sat': [{ start: [6, 0], end: [23, 59], name: "토요 소망의 노래", timeFolder: "0600", fileCount: 18 }]
     };
 
     const DAYS_SHORT = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -195,6 +200,25 @@
         }
     };
 
+
+	function playDefaultAudio() {
+    if (isDefaultPlaying) return;
+
+    player.src = DEFAULT_AUDIO;
+    trackInfo.textContent = "기본 음악 재생 중";
+    info.textContent = "방송 대기 중";
+    statusMessageEl.textContent = "";
+
+    player.play().then(() => {
+        isDefaultPlaying = true;
+        isPlayerStarted = false;
+        playBtn.style.display = "none";
+    }).catch(() => {
+        console.log("default 음원 자동 재생 대기 중");
+    });
+}
+
+	
     function updateRadio() {
         const now = new Date();
         const dayIndex = now.getDay();
@@ -206,6 +230,7 @@
         currentTimeEl.textContent = `현재 시각: ${now.toLocaleTimeString('ko-KR', { hour12: false })} (${DAYS_SHORT[dayIndex].toUpperCase()})`;
 
         if (program) {
+			isDefaultPlaying = false;
             info.textContent = `On-Air: ${program.name}`;
             
             // 재생 중인데 날짜나 시간 폴더가 바뀌었을 경우 리셋
@@ -219,12 +244,15 @@
         } else {
             info.textContent = "현재는 방송 스케줄이 없습니다.";
             trackInfo.textContent = "-";
-            player.pause();
+            // player.pause();//default play file이 없을때 
+			playDefaultAudio(); // defaulty file play
         }
     }
 
     playBtn.addEventListener("click", () => {
         const program = getCurrentProgram();
+		 isDefaultPlaying = false;
+		
         if (program) {
             isPlayerStarted = true;
             skipAttemptCount = 0;
@@ -232,6 +260,7 @@
             loadAndPlay(program);
         } else {
             alert("방송 시간이 아닙니다.");
+			playDefaultAudio();
         }
     });
 

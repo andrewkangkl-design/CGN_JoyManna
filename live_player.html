@@ -314,6 +314,10 @@
     // === 이벤트 리스너: 재생 시작 버튼 처리 ===
     playBtn.addEventListener("click", () => {
         const program = getCurrentProgram();
+
+		if (debug){
+			console.log("URL:" + program.url);
+		}
         
         if (!isPlayerStarted) {
             isPlayerStarted = true;

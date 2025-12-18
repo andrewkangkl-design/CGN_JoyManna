@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>CGN JoyManna Radio - Smart Skip System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Noto Sans KR", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1e293b; /* 기본 배경 */
+            transition: background 1s ease-in-out;
+            color: #fff;
+        }
+
+        .radio-container {
+            text-align: center;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 35px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+        }
+
+        h1 { font-size: 1.2rem; margin-bottom: 20px; letter-spacing: -0.5px; }
+        #current-time { font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px; }
+        #info { font-size: 1.1rem; font-weight: bold; color: #38bdf8; margin-bottom: 8px; }
+        #track-info { font-size: 0.9rem; color: #fbbf24; margin-bottom: 20px; }
+
+        audio { width: 100%; margin-top: 10px; filter: invert(100%) hue-rotate(180deg); opacity: 0.8; }
+
+        #playBtn {
+            margin-top: 20px;
+            background: #10b981;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        #playBtn:hover { background: #059669; transform: scale(1.02); }
+        
+        #statusMessage { font-size: 0.8rem; color: #f87171; margin-top: 15px; min-height: 20px; }
+    </style>
+</head>
+<body>
+    <div class="radio-container">
+        <h1 id="theme-title">🎶 CGN JoyManna Radio</h1>
+        <p id="current-time">시각 로딩 중...</p>
+        <div id="info">방송 대기 중</div>
+        <div id="track-info">준비 완료</div>
+    
+        <audio id="player" controls></audio>
+        <button id="playBtn">▶ 라디오 시작하기</button>
+        <p id="statusMessage"></p>
+    </div>
+
+<script>
+    const player = document.getElementById("player");
+    const info = document.getElementById("info");
+    const trackInfo = document.getElementById("track-info");
+    const playBtn = document.getElementById("playBtn");
+    const statusMessageEl = document.getElementById("statusMessage");
+    const currentTimeEl = document.getElementById("current-time");
+
+    let isPlayerStarted = false;
+    let currentTrackIndex = 1;
+    let skipAttemptCount = 0; // 파일이 없을 때 넘기기 시도 횟수 제한
+
+    // 1. 접속 환경에 따른 BASE_URL 자동 설정
+    const BASE_URL = window.location.hostname.includes('github.io') 
+        ? "https://andrewkangkl-design.github.io/CGN_JoyManna/" 
+        : "https://cgnjoymanna.synology.me/radio/";
+
+    // 2. 요일별 테마 색상 정의
+    const THEMES = [
+        "linear-gradient(135deg, #450a0a, #7f1d1d)", // 일 (Red)
+        "linear-gradient(135deg, #0f172a, #1e293b)", // 월 (Slate)
+        "linear-gradient(135deg, #064e3b, #134e4a)", // 화 (Emerald)
+        "linear-gradient(135deg, #1e1b4b, #312e81)", // 수 (Indigo)
+        "linear-gradient(135deg, #422006, #713f12)", // 목 (Amber)
+        "linear-gradient(135deg, #2e1065, #4c1d95)", // 금 (Purple)
+        "linear-gradient(135deg, #18181b, #27272a)"  // 토 (Zinc)
+    ];
+
+    // 3. 스케줄 설정 (timeFolder와 fileCount 필수)
+    const SCHEDULE_CONFIG = {
+        'sun': [{ start: [0, 0], end: [23, 59], name: "주일 전일 찬양", timeFolder: "0000", fileCount: 20 }],
+        'mon': [{ start: [6, 0], end: [23, 59], name: "월요 아침의 묵상", timeFolder: "0600", fileCount: 10 }],
+        'tue': [{ start: [6, 0], end: [23, 59], name: "화요 은혜의 대로", timeFolder: "0600", fileCount: 10 }],
+        'wed': [{ start: [6, 0], end: [23, 59], name: "수요 감사의 찬양", timeFolder: "0600", fileCount: 10 }],
+        'thu': [{ start: [6, 0], end: [23, 59], name: "목요 평화의 기도", timeFolder: "0600", fileCount: 10 }],
+        'fri': [{ start: [6, 0], end: [23, 59], name: "금요 성령의 불길", timeFolder: "0600", fileCount: 10 }],
+        'sat': [{ start: [6, 0], end: [23, 59], name: "토요 소망의 노래", timeFolder: "0600", fileCount: 10 }]
+    };
+
+    const DAYS_SHORT = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+    function getFormattedDate() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function getCurrentProgram() {
+        const now = new Date();
+        const dayKey = DAYS_SHORT[now.getDay()];
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const todaySchedule = SCHEDULE_CONFIG[dayKey];
+        if (!todaySchedule) return null;
+        return todaySchedule.find(p => {
+            const minStart = p.start[0] * 60 + p.start[1];
+            const minEnd = p.end[0] * 60 + p.end[1];
+            return currentMinutes >= minStart && currentMinutes <= minEnd;
+        });
+    }
+
+    // 재생 함수
+    function loadAndPlay(program) {
+        if (!program) return;
+        const dateFolder = getFormattedDate();
+        const url = `${BASE_URL}${dateFolder}/${program.timeFolder}/${currentTrackIndex}.mp3`;
+        
+        player.src = url;
+        trackInfo.textContent = `현재 파일: ${currentTrackIndex}번 (전체 ${program.fileCount}개 중)`;
+        
+        player.play().then(() => {
+            skipAttemptCount = 0; // 성공하면 스킵 카운트 초기화
+            statusMessageEl.textContent = "";
+            playBtn.style.display = "none";
+        }).catch(err => {
+            console.log("자동 재생 대기 중...");
+        });
+    }
+
+    // ★ 핵심: 파일이 없을 때 스킵하는 로직
+    player.onerror = function() {
+        if (!isPlayerStarted) return;
+        
+        const program = getCurrentProgram();
+        if (program) {
+            console.warn(`${currentTrackIndex}.mp3 파일 없음. 스킵합니다.`);
+            skipAttemptCount++;
+            
+            // 폴더 내 파일 개수만큼 시도했는데도 다 없으면 중단 (무한 루프 방지)
+            if (skipAttemptCount >= program.fileCount) {
+                statusMessageEl.textContent = "해당 폴더에 재생 가능한 파일이 하나도 없습니다.";
+                isPlayerStarted = false;
+                return;
+            }
+
+            currentTrackIndex++;
+            if (currentTrackIndex > program.fileCount) currentTrackIndex = 1;
+            
+            statusMessageEl.textContent = "파일을 찾는 중... (다음 번호로 건너뛰기)";
+            loadAndPlay(program);
+        }
+    };
+
+    // 곡이 끝났을 때 다음 곡으로 이동
+    player.onended = function() {
+        const program = getCurrentProgram();
+        if (program) {
+            currentTrackIndex++;
+            if (currentTrackIndex > program.fileCount) currentTrackIndex = 1;
+            loadAndPlay(program);
+        }
+    };
+
+    function updateRadio() {
+        const now = new Date();
+        const dayIndex = now.getDay();
+        const program = getCurrentProgram();
+        
+        // 요일별 배경 테마 변경
+        document.body.style.background = THEMES[dayIndex];
+        
+        currentTimeEl.textContent = `현재 시각: ${now.toLocaleTimeString('ko-KR', { hour12: false })} (${DAYS_SHORT[dayIndex].toUpperCase()})`;
+
+        if (program) {
+            info.textContent = `On-Air: ${program.name}`;
+            
+            // 재생 중인데 날짜나 시간 폴더가 바뀌었을 경우 리셋
+            if (isPlayerStarted) {
+                const currentPath = `${getFormattedDate()}/${program.timeFolder}/`;
+                if (!player.src.includes(currentPath)) {
+                    currentTrackIndex = 1;
+                    loadAndPlay(program);
+                }
+            }
+        } else {
+            info.textContent = "현재는 방송 스케줄이 없습니다.";
+            trackInfo.textContent = "-";
+            player.pause();
+        }
+    }
+
+    playBtn.addEventListener("click", () => {
+        const program = getCurrentProgram();
+        if (program) {
+            isPlayerStarted = true;
+            skipAttemptCount = 0;
+            currentTrackIndex = 1; 
+            loadAndPlay(program);
+        } else {
+            alert("방송 시간이 아닙니다.");
+        }
+    });
+
+    setInterval(updateRadio, 10000);
+    updateRadio();
+</script>
+</body>
+</html>

@@ -24,14 +24,16 @@
         .radio-container {
             text-align: center;
             /*background: rgba(15, 23, 42, 0.85);/*원래 있는 색깔*/
-            background: rgba(30, 40, 59, 0.7);
             padding: 1px;
             border-radius: 12px;
             width: 90%;
             max-width: 450px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 10px -12px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
+      		border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 12px rgba(0, 0, 0, 0.3);	
+			/*backdrop-filter: blur(10px); /* 배경 흐림 효과로 글자 가독성 향상 */
+			background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(2, 6, 23, 0.55));
+	    	backdrop-filter: blur(18px) saturate(120%);
+    		-webkit-backdrop-filter: blur(18px) saturate(120%);
         }
 
         h1 { font-size: 1.0rem; margin-bottom: 5px; letter-spacing: -0.5px;}

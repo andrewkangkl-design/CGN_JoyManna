@@ -100,7 +100,7 @@
      //   : "https://andrewkangkl-design.github.io/CGN_JoyManna/";
     const BASE_URL = "https://andrewkangkl-design.github.io/CGN_JoyManna/";
     console.log("URL:" + BASE_URL);
-
+/*
     // 2. 요일별 테마 색상 정의
     const THEMES = [
         "linear-gradient(135deg, #450a0a, #7f1d1d)", // 일 (Red)
@@ -111,7 +111,7 @@
         "linear-gradient(135deg, #2e1065, #4c1d95)", // 금 (Purple)
         "linear-gradient(135deg, #18181b, #27272a)"  // 토 (Zinc)
     ];
-
+*/
     // 3. 스케줄 설정 (timeFolder와 fileCount 필수)
     const SCHEDULE_CONFIG = {
         'sun': [{ start: [0, 0], end: [23, 59], name: "주일 전일 찬양", timeFolder: "0000", fileCount: 20 }],
@@ -201,7 +201,7 @@
         const program = getCurrentProgram();
         
         // 요일별 배경 테마 변경
-        document.body.style.background = THEMES[dayIndex];
+        //document.body.style.background = THEMES[dayIndex];
         
         currentTimeEl.textContent = `현재 시각: ${now.toLocaleTimeString('ko-KR', { hour12: false })} (${DAYS_SHORT[dayIndex].toUpperCase()})`;
 
